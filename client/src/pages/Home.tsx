@@ -1,3 +1,5 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useApp } from "@/contexts/AppContext";
-import { Calculator, Box } from "lucide-react";
-import { useState } from "react";
+import { Calculator, Box, Save, Lightbulb } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ResultadoCalculo {
   custo_materiais: number;
@@ -32,6 +35,10 @@ interface ResultadoCalculo {
 }
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+
   const { configuracoes, bastidores, descontosQuantidade } = useApp();
 
   // Estados do formulário
@@ -49,6 +56,63 @@ export default function Home() {
 
   // Estado do resultado
   const [resultado, setResultado] = useState<ResultadoCalculo | null>(null);
+  const [orcamentosSimilares, setOrcamentosSimilares] = useState<any[]>([]);
+
+  // Mutação para criar orçamento
+  const createOrcamentoMutation = trpc.orcamentos.create.useMutation({
+    onSuccess: () => {
+      toast.success("Orçamento salvo com sucesso!");
+    },
+    onError: (error) => {
+      toast.error(`Erro ao salvar orçamento: ${error.message}`);
+    },
+  });
+
+  // Query para buscar orçamentos similares
+  const { data: similares } = trpc.orcamentos.findSimilar.useQuery(
+    {
+      forma,
+      tamanhoA: parseFloat(tamanhoA) || 0,
+      pontos: parseInt(pontos) || 0,
+    },
+    {
+      enabled: isAuthenticated && !!tamanhoA && !!pontos,
+    }
+  );
+
+  // Atualizar orçamentos similares quando a query retornar
+  useEffect(() => {
+    if (similares && similares.length > 0) {
+      setOrcamentosSimilares(similares);
+    } else {
+      setOrcamentosSimilares([]);
+    }
+  }, [similares]);
+
+  // Carregar orçamento duplicado do localStorage
+  useEffect(() => {
+    const orcamentoDuplicar = localStorage.getItem("orcamento_duplicar");
+    if (orcamentoDuplicar) {
+      try {
+        const orc = JSON.parse(orcamentoDuplicar);
+        setForma(orc.forma);
+        setTamanhoA(orc.tamanhoA.toString());
+        if (orc.tamanhoB) setTamanhoB(orc.tamanhoB.toString());
+        setPontos(orc.pontos.toString());
+        setCores(orc.cores.toString());
+        setFixacao(orc.fixacao);
+        setMaquina(orc.maquina);
+        setMaterialBase(orc.materialBase);
+        setMargemPercentual(orc.margemPercentual.toString());
+        setQuantidade(orc.quantidade.toString());
+        setVendaOnline(orc.vendaOnline);
+        localStorage.removeItem("orcamento_duplicar");
+        toast.success("Orçamento carregado! Clique em Calcular Preço.");
+      } catch (e) {
+        console.error("Erro ao carregar orçamento duplicado", e);
+      }
+    }
+  }, []);
 
   const calcularCusto = () => {
     // Conversão de valores
@@ -202,7 +266,7 @@ export default function Home() {
       }
     }
 
-    setResultado({
+    const resultadoCalculado = {
       custo_materiais,
       custo_linha,
       custo_energia,
@@ -221,7 +285,53 @@ export default function Home() {
       preco_total,
       venda_online: vendaOnline,
       margem_online_aplicada: margem_online_aplicada * 100,
-    });
+    };
+
+    setResultado(resultadoCalculado);
+
+    // Salvar automaticamente se o usuário estiver logado
+    if (isAuthenticated) {
+      createOrcamentoMutation.mutate({
+        forma,
+        tamanhoA: _tamanhoA,
+        tamanhoB: forma === "retangular" ? _tamanhoB : undefined,
+        pontos: _pontos,
+        cores: _cores,
+        fixacao,
+        maquina,
+        materialBase,
+        margemPercentual: _margemPercentual,
+        quantidade: _quantidade,
+        vendaOnline,
+        custoMateriais: custo_materiais,
+        custoLinha: custo_linha,
+        custoEnergia: custo_energia,
+        custoPorPontos: custo_por_pontos,
+        custoFixacaoAdicional: custo_fixacao_adicional,
+        custoTotalProducao: custo_total_producao,
+        precoFinalArredondado: preco_final_arredondado,
+        descontoAplicado: desconto_aplicado * 100,
+        precoUnitarioComDesconto: preco_unitario_com_desconto,
+        precoTotal: preco_total,
+        bastidorSugerido: bastidor_sugerido,
+        pecasPorBastidor: pecas_por_bastidor,
+      });
+    }
+  };
+
+  const carregarOrcamentoSimilar = (orc: any) => {
+    setForma(orc.forma);
+    setTamanhoA(orc.tamanhoA.toString());
+    if (orc.tamanhoB) setTamanhoB(orc.tamanhoB.toString());
+    setPontos(orc.pontos.toString());
+    setCores(orc.cores.toString());
+    setFixacao(orc.fixacao);
+    setMaquina(orc.maquina);
+    setMaterialBase(orc.materialBase);
+    setMargemPercentual(orc.margemPercentual.toString());
+    setQuantidade(orc.quantidade.toString());
+    setVendaOnline(orc.vendaOnline);
+    toast.success("Dados carregados! Ajuste se necessário e clique em Calcular Preço.");
   };
 
   return (
@@ -234,6 +344,37 @@ export default function Home() {
           </div>
           <p className="text-gray-600">Calcule o custo de produção e o preço de venda sugerido para seus bordados computadorizados</p>
         </div>
+
+        {/* Orçamentos Similares */}
+        {isAuthenticated && orcamentosSimilares.length > 0 && (
+          <Alert className="mb-6 bg-yellow-50 border-yellow-200">
+            <Lightbulb className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800">Orçamentos Similares Encontrados</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              <p className="mb-3">Encontramos {orcamentosSimilares.length} orçamento(s) similar(es) aos dados que você está preenchendo:</p>
+              <div className="space-y-2">
+                {orcamentosSimilares.slice(0, 3).map((orc) => (
+                  <div key={orc.id} className="flex items-center justify-between bg-white p-3 rounded border border-yellow-200">
+                    <div className="text-sm">
+                      <span className="font-medium">
+                        {orc.forma === "retangular" ? `${orc.tamanhoA} × ${orc.tamanhoB} cm` : `Ø ${orc.tamanhoA} cm`}
+                      </span>
+                      {" • "}
+                      <span>{orc.pontos.toLocaleString("pt-BR")} pts</span>
+                      {" • "}
+                      <span>{orc.cores} cores</span>
+                      {" • "}
+                      <span className="text-green-700 font-semibold">R$ {orc.precoTotal.toFixed(2)}</span>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => carregarOrcamentoSimilar(orc)}>
+                      Usar como Base
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Card de Entrada */}

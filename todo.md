@@ -26,3 +26,19 @@
 - [x] Adicionar opção "Venda Online" com margem extra de 10%
 - [x] Criar navegação entre as diferentes seções (Calculadora, Bastidores, Configurações)
 - [x] Exibir bastidor sugerido e quantidade de peças no resultado
+
+## Sistema de Autenticação e Orçamentos
+
+- [x] Adicionar funcionalidades de backend (web-db-user)
+- [x] Criar schema do banco de dados para usuários e orçamentos
+- [x] Implementar sistema de autenticação (login e registro)
+- [x] Criar página de login/registro (OAuth Manus integrado)
+- [x] Adicionar proteção de rotas para usuários autenticados
+- [x] Criar modelo de dados para orçamentos salvos
+- [x] Implementar salvamento automático de orçamentos após cálculo (frontend)
+- [x] Criar página de listagem de orçamentos
+- [x] Adicionar filtros e busca na listagem de orçamentos
+- [x] Implementar busca inteligente de orçamentos similares (backend)
+- [x] Adicionar botão para duplicar orçamento existente
+- [x] Exibir sugestões de orçamentos similares durante a criação
+- [x] Adicionar informações do usuário no orçamento (quem criou, quando)
