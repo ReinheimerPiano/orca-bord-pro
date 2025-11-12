@@ -81,3 +81,11 @@
 - [ ] Renomear aplicação para "BordaCalc Pro" ou "Trilinha Manager"
 - [ ] Otimizar layout para telas pequenas
 - [ ] Melhorar usabilidade em dispositivos touch
+
+## Melhorias Mobile (Navegação)
+
+- [x] Implementar menu hamburger para mobile (≤768px)
+- [x] Criar navegação responsiva que se adapta ao tamanho da tela
+- [x] Adicionar transições suaves e animações
+- [x] Aumentar área de toque dos botões para mobile
+- [x] Testar em diferentes tamanhos de tela

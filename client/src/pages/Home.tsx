@@ -363,14 +363,14 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-4 md:py-8 px-3 md:px-4">
       <div className="container max-w-6xl">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <Calculator className="w-10 h-10 text-indigo-600" />
-            <h1 className="text-4xl font-bold text-gray-900">Calculadora de Custos de Bordados</h1>
+        <div className="text-center mb-6 md:mb-8">
+          <div className="flex items-center justify-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <Calculator className="w-8 h-8 md:w-10 md:h-10 text-indigo-600" />
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900">Calculadora de Custos de Bordados</h1>
           </div>
-          <p className="text-gray-600">Calcule o custo de produção e o preço de venda sugerido para seus bordados computadorizados</p>
+          <p className="text-sm md:text-base text-gray-600 px-4">Calcule o custo de produção e o preço de venda sugerido para seus bordados computadorizados</p>
         </div>
 
         {/* Orçamentos Similares */}
@@ -404,7 +404,7 @@ export default function Home() {
           </Alert>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2 gap-4 lg:gap-6">
           {/* Card de Entrada */}
           <Card className="shadow-lg">
             <CardHeader>
