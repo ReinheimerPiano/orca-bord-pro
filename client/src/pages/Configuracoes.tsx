@@ -49,6 +49,10 @@ export default function Configuracoes() {
         arredondamento: 0.5,
         margem_venda_online: 0.1,
         custo_por_1000_pontos: 0.1,
+        margem_entre_bordados: 0.5,
+        limite_custo_por_1000_pontos: 5.0,
+        custo_criacao_matriz: 50.0,
+        valor_isencao_matriz: 150.0,
       };
       setConfig(configPadrao);
       setConfiguracoes(configPadrao);
@@ -394,6 +398,70 @@ export default function Configuracoes() {
                     value={config.custo_por_1000_pontos}
                     onChange={(e) => setConfig({ ...config, custo_por_1000_pontos: parseFloat(e.target.value) })}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Limite Máximo Custo por 1.000 Pontos (R$)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={config.limite_custo_por_1000_pontos}
+                    onChange={(e) => setConfig({ ...config, limite_custo_por_1000_pontos: parseFloat(e.target.value) })}
+                  />
+                  <p className="text-xs text-gray-500">Teto máximo que pode ser cobrado por 1.000 pontos</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Bastidores e Produção */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Bastidores e Produção</CardTitle>
+              <CardDescription>Configurações de otimização de bastidores</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Margem Entre Bordados no Bastidor (cm)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={config.margem_entre_bordados}
+                    onChange={(e) => setConfig({ ...config, margem_entre_bordados: parseFloat(e.target.value) })}
+                  />
+                  <p className="text-xs text-gray-500">Espaço mínimo entre bordados dentro do bastidor</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Matriz */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Custo de Matriz</CardTitle>
+              <CardDescription>Configurações de cobrança de criação de matriz</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Custo de Criação de Matriz (R$)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={config.custo_criacao_matriz}
+                    onChange={(e) => setConfig({ ...config, custo_criacao_matriz: parseFloat(e.target.value) })}
+                  />
+                  <p className="text-xs text-gray-500">Valor cobrado pela criação da matriz do bordado</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Valor Mínimo para Isenção de Matriz (R$)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={config.valor_isencao_matriz}
+                    onChange={(e) => setConfig({ ...config, valor_isencao_matriz: parseFloat(e.target.value) })}
+                  />
+                  <p className="text-xs text-gray-500">Pedidos acima deste valor não pagam custo de matriz</p>
                 </div>
               </div>
             </CardContent>

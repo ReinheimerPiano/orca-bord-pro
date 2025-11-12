@@ -17,6 +17,10 @@ export default function Bastidores() {
   const [nome, setNome] = useState("");
   const [largura, setLargura] = useState("");
   const [altura, setAltura] = useState("");
+  const [larguraUtil, setLarguraUtil] = useState("");
+  const [alturaUtil, setAlturaUtil] = useState("");
+  const [margemInterna, setMargemInterna] = useState("0.25");
+  const [orelhaSeguranca, setOrelhaSeguranca] = useState("2.0");
 
   const abrirDialogNovo = () => {
     setModoEdicao(false);
@@ -24,6 +28,10 @@ export default function Bastidores() {
     setNome("");
     setLargura("");
     setAltura("");
+    setLarguraUtil("");
+    setAlturaUtil("");
+    setMargemInterna("0.25");
+    setOrelhaSeguranca("2.0");
     setDialogAberto(true);
   };
 
@@ -33,28 +41,55 @@ export default function Bastidores() {
     setNome(bastidor.nome);
     setLargura(bastidor.largura.toString());
     setAltura(bastidor.altura.toString());
+    setLarguraUtil(bastidor.largura_util.toString());
+    setAlturaUtil(bastidor.altura_util.toString());
+    setMargemInterna(bastidor.margem_interna.toString());
+    setOrelhaSeguranca(bastidor.orelha_seguranca.toString());
     setDialogAberto(true);
   };
 
   const handleSalvar = () => {
-    if (!nome || !largura || !altura) {
+    if (!nome || !largura || !altura || !larguraUtil || !alturaUtil || !margemInterna || !orelhaSeguranca) {
       toast.error("Preencha todos os campos!");
       return;
     }
 
     const _largura = parseFloat(largura);
     const _altura = parseFloat(altura);
+    const _larguraUtil = parseFloat(larguraUtil);
+    const _alturaUtil = parseFloat(alturaUtil);
+    const _margemInterna = parseFloat(margemInterna);
+    const _orelhaSeguranca = parseFloat(orelhaSeguranca);
 
-    if (isNaN(_largura) || isNaN(_altura) || _largura <= 0 || _altura <= 0) {
-      toast.error("Largura e altura devem ser números positivos!");
+    if (
+      isNaN(_largura) || isNaN(_altura) || isNaN(_larguraUtil) || isNaN(_alturaUtil) ||
+      isNaN(_margemInterna) || isNaN(_orelhaSeguranca) ||
+      _largura <= 0 || _altura <= 0 || _larguraUtil <= 0 || _alturaUtil <= 0
+    ) {
+      toast.error("Todos os valores devem ser números positivos!");
       return;
     }
 
+    if (_larguraUtil >= _largura || _alturaUtil >= _altura) {
+      toast.error("Área útil deve ser menor que o tamanho total do bastidor!");
+      return;
+    }
+
+    const bastidorData = {
+      nome,
+      largura: _largura,
+      altura: _altura,
+      largura_util: _larguraUtil,
+      altura_util: _alturaUtil,
+      margem_interna: _margemInterna,
+      orelha_seguranca: _orelhaSeguranca,
+    };
+
     if (modoEdicao && bastidorAtual) {
-      editarBastidor(bastidorAtual.id, { nome, largura: _largura, altura: _altura });
+      editarBastidor(bastidorAtual.id, bastidorData);
       toast.success("Bastidor atualizado com sucesso!");
     } else {
-      adicionarBastidor({ nome, largura: _largura, altura: _altura });
+      adicionarBastidor(bastidorData);
       toast.success("Bastidor adicionado com sucesso!");
     }
 
@@ -145,13 +180,37 @@ export default function Bastidores() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="largura">Largura (cm)</Label>
-                  <Input id="largura" type="number" value={largura} onChange={(e) => setLargura(e.target.value)} placeholder="30" />
+                  <Label htmlFor="largura">Largura Total (cm)</Label>
+                  <Input id="largura" type="number" step="0.1" value={largura} onChange={(e) => setLargura(e.target.value)} placeholder="30" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="altura">Altura (cm)</Label>
-                  <Input id="altura" type="number" value={altura} onChange={(e) => setAltura(e.target.value)} placeholder="18" />
+                  <Label htmlFor="altura">Altura Total (cm)</Label>
+                  <Input id="altura" type="number" step="0.1" value={altura} onChange={(e) => setAltura(e.target.value)} placeholder="18" />
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="larguraUtil">Largura Útil (cm)</Label>
+                  <Input id="larguraUtil" type="number" step="0.1" value={larguraUtil} onChange={(e) => setLarguraUtil(e.target.value)} placeholder="29.5" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="alturaUtil">Altura Útil (cm)</Label>
+                  <Input id="alturaUtil" type="number" step="0.1" value={alturaUtil} onChange={(e) => setAlturaUtil(e.target.value)} placeholder="17.5" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="margemInterna">Margem Interna Não Bordável (cm)</Label>
+                  <Input id="margemInterna" type="number" step="0.1" value={margemInterna} onChange={(e) => setMargemInterna(e.target.value)} placeholder="0.25" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="orelhaSeguranca">Orelha de Segurança (cm)</Label>
+                  <Input id="orelhaSeguranca" type="number" step="0.1" value={orelhaSeguranca} onChange={(e) => setOrelhaSeguranca(e.target.value)} placeholder="2.0" />
+                </div>
+              </div>
+              <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
+                <p><strong>Área Útil:</strong> área real disponível para bordado (descontando margem interna não bordável)</p>
+                <p><strong>Orelha de Segurança:</strong> margem externa necessária para esticar o tecido no bastidor (padrão 2cm)</p>
               </div>
             </div>
             <DialogFooter>

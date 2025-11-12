@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useApp } from "@/contexts/AppContext";
-import { Calculator, Box, Save, Lightbulb } from "lucide-react";
+import { Calculator, Box, Save, Lightbulb, RotateCw } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { sugerirBastidorParaQuantidade } from "@/lib/bastidor-optimizer";
 
 interface ResultadoCalculo {
   custo_materiais: number;
@@ -26,12 +27,17 @@ interface ResultadoCalculo {
   area_carregada_m2: number;
   bastidor_sugerido: string;
   pecas_por_bastidor: number;
+  rotacao_sugerida: boolean;
+  percentual_aproveitamento: number;
   quantidade_total: number;
   desconto_aplicado: number;
   preco_unitario_com_desconto: number;
   preco_total: number;
   venda_online: boolean;
   margem_online_aplicada: number;
+  custo_matriz: number;
+  matriz_isenta: boolean;
+  limite_custo_atingido: boolean;
 }
 
 export default function Home() {
@@ -203,8 +209,12 @@ export default function Home() {
     const consumo_kwh = kw * tempo_h;
     const custo_energia = consumo_kwh * configuracoes.tarifa_energia;
 
-    // --- 5. Custo por Milhar de Ponto ---
-    const custo_por_pontos = (_pontos / 1000) * configuracoes.custo_por_1000_pontos;
+    // --- 5. Custo por Milhar de Ponto (com limite configurável) ---
+    let custo_por_pontos = (_pontos / 1000) * configuracoes.custo_por_1000_pontos;
+    const limite_atingido = custo_por_pontos > configuracoes.limite_custo_por_1000_pontos;
+    if (limite_atingido) {
+      custo_por_pontos = configuracoes.limite_custo_por_1000_pontos;
+    }
 
     // --- 6. Custo de Fixação Adicional ---
     let custo_fixacao_adicional = 0;
@@ -216,10 +226,14 @@ export default function Home() {
       custo_fixacao_adicional = configuracoes.custo_broche;
     }
 
-    // --- 7. Custo Total de Produção ---
+    // --- 7. Custo de Matriz (com isenção automática) ---
+    let custo_matriz = configuracoes.custo_criacao_matriz;
+    let matriz_isenta = false;
+
+    // --- 8. Custo Total de Produção (unitário, sem matriz) ---
     const custo_total_producao = custo_materiais + custo_linha + custo_energia + custo_por_pontos + custo_fixacao_adicional;
 
-    // --- 8. Preço de Venda Sugerido (Unitário) ---
+    // --- 9. Preço de Venda Sugerido (Unitário) ---
     let margem_final = _margemPercentual;
     let margem_online_aplicada = 0;
 
@@ -244,26 +258,35 @@ export default function Home() {
     }
 
     const preco_unitario_com_desconto = preco_final_arredondado * (1 - desconto_aplicado);
-    const preco_total = preco_unitario_com_desconto * _quantidade;
+    let preco_total_sem_matriz = preco_unitario_com_desconto * _quantidade;
 
-    // --- 10. Sugestão de Bastidor ---
+    // Verificar isenção de matriz
+    if (preco_total_sem_matriz >= configuracoes.valor_isencao_matriz) {
+      matriz_isenta = true;
+      custo_matriz = 0;
+    }
+
+    const preco_total = preco_total_sem_matriz + custo_matriz;
+
+    // --- 10. Sugestão de Bastidor (Sistema Inteligente com Otimização) ---
     let bastidor_sugerido = "Nenhum bastidor adequado";
     let pecas_por_bastidor = 0;
+    let rotacao_sugerida = false;
+    let percentual_aproveitamento = 0;
 
-    // Ordenar bastidores por área (menor para maior)
-    const bastidoresOrdenados = [...bastidores].sort((a, b) => a.largura * a.altura - b.largura * b.altura);
+    const otimizacao = sugerirBastidorParaQuantidade(
+      largura_patch,
+      altura_patch,
+      _quantidade,
+      bastidores,
+      configuracoes.margem_entre_bordados
+    );
 
-    for (const bastidor of bastidoresOrdenados) {
-      // Calcular quantas peças cabem no bastidor (considerando gutter)
-      const pecas_largura = Math.floor(bastidor.largura / (largura_patch + configuracoes.gutter_cm));
-      const pecas_altura = Math.floor(bastidor.altura / (altura_patch + configuracoes.gutter_cm));
-      const total_pecas = pecas_largura * pecas_altura;
-
-      if (total_pecas >= 1) {
-        bastidor_sugerido = bastidor.nome;
-        pecas_por_bastidor = total_pecas;
-        break;
-      }
+    if (otimizacao) {
+      bastidor_sugerido = otimizacao.bastidor.nome;
+      pecas_por_bastidor = otimizacao.total_pecas;
+      rotacao_sugerida = otimizacao.rotacao_sugerida;
+      percentual_aproveitamento = otimizacao.percentual_aproveitamento;
     }
 
     const resultadoCalculado = {
@@ -279,12 +302,17 @@ export default function Home() {
       area_carregada_m2,
       bastidor_sugerido,
       pecas_por_bastidor,
+      rotacao_sugerida,
+      percentual_aproveitamento,
       quantidade_total: _quantidade,
       desconto_aplicado: desconto_aplicado * 100,
       preco_unitario_com_desconto,
       preco_total,
       venda_online: vendaOnline,
       margem_online_aplicada: margem_online_aplicada * 100,
+      custo_matriz,
+      matriz_isenta,
+      limite_custo_atingido: limite_atingido,
     };
 
     setResultado(resultadoCalculado);
@@ -523,9 +551,20 @@ export default function Home() {
                         <p className="font-semibold text-gray-700">Bastidor Sugerido</p>
                         <p className="text-sm text-gray-600 mt-1">{resultado.bastidor_sugerido}</p>
                         {resultado.pecas_por_bastidor > 0 && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            Capacidade: {resultado.pecas_por_bastidor} peça(s) por bastidor
-                          </p>
+                          <>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Capacidade: {resultado.pecas_por_bastidor} peça(s) por bastidor
+                            </p>
+                            {resultado.rotacao_sugerida && (
+                              <div className="flex items-center gap-1 mt-2 text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded">
+                                <RotateCw className="w-3 h-3" />
+                                <span>Sugestão: Rotacionar matriz em 90° para melhor aproveitamento</span>
+                              </div>
+                            )}
+                            <p className="text-xs text-gray-500 mt-1">
+                              Aproveitamento: {resultado.percentual_aproveitamento.toFixed(1)}% da área útil
+                            </p>
+                          </>
                         )}
                       </div>
                     </div>
@@ -597,6 +636,28 @@ export default function Home() {
                           <span className="text-gray-600">Preço Unitário (com desconto):</span>
                           <span className="font-medium">R$ {resultado.preco_unitario_com_desconto.toFixed(2)}</span>
                         </div>
+                      </div>
+                      <Separator />
+                    </>
+                  )}
+
+                  {/* Custo de Matriz */}
+                  {resultado.custo_matriz > 0 && (
+                    <>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Custo de Criação de Matriz:</span>
+                          <span className="font-medium">R$ {resultado.custo_matriz.toFixed(2)}</span>
+                        </div>
+                      </div>
+                      <Separator />
+                    </>
+                  )}
+                  {resultado.matriz_isenta && (
+                    <>
+                      <div className="bg-green-50 p-3 rounded text-sm text-green-700">
+                        <p className="font-semibold">✓ Matriz Isenta</p>
+                        <p className="text-xs mt-1">Pedido acima de R$ {configuracoes.valor_isencao_matriz.toFixed(2)} - custo de matriz não cobrado</p>
                       </div>
                       <Separator />
                     </>

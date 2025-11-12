@@ -4,8 +4,12 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 export interface Bastidor {
   id: string;
   nome: string;
-  largura: number; // cm
-  altura: number; // cm
+  largura: number; // cm (tamanho total do bastidor)
+  altura: number; // cm (tamanho total do bastidor)
+  largura_util: number; // cm (área útil real para bordado)
+  altura_util: number; // cm (área útil real para bordado)
+  margem_interna: number; // cm (margem interna não bordável)
+  orelha_seguranca: number; // cm (orelha para esticar tecido, padrão 2cm)
 }
 
 export interface Configuracoes {
@@ -22,6 +26,7 @@ export interface Configuracoes {
   desperdicio: number;
   orelha_cm: number;
   gutter_cm: number;
+  margem_entre_bordados: number; // cm (margem entre bordados dentro do bastidor)
 
   // Linha
   linha_preco_rolo: number;
@@ -47,6 +52,9 @@ export interface Configuracoes {
   arredondamento: number;
   margem_venda_online: number;
   custo_por_1000_pontos: number;
+  limite_custo_por_1000_pontos: number; // Teto máximo
+  custo_criacao_matriz: number;
+  valor_isencao_matriz: number; // Valor mínimo do pedido para isenção da matriz
 }
 
 export interface DescontoQuantidade {
@@ -98,17 +106,84 @@ const configuracoesIniciaisDefault: Configuracoes = {
   arredondamento: 0.5,
   margem_venda_online: 0.1,
   custo_por_1000_pontos: 0.1,
+  margem_entre_bordados: 0.5, // 0.5cm entre bordados
+  limite_custo_por_1000_pontos: 5.0, // Teto de R$ 5,00 por 1.000 pontos
+  custo_criacao_matriz: 50.0, // R$ 50,00 para criar matriz
+  valor_isencao_matriz: 150.0, // Pedidos acima de R$ 150 isentam matriz
 };
 
-// Bastidores padrão da planilha
+// Bastidores padrão da planilha (com área útil e margens)
 const bastidoresIniciaisDefault: Bastidor[] = [
-  { id: "1", nome: "Brother Small 20x60", largura: 6, altura: 2 },
-  { id: "2", nome: "Brother Small 30x50", largura: 5, altura: 3 },
-  { id: "3", nome: "Brother Small 40x30", largura: 4, altura: 3 },
-  { id: "4", nome: "Brother Regular 10x10", largura: 10, altura: 10 },
-  { id: "5", nome: "Brother Medium 13x18", largura: 18, altura: 13 },
-  { id: "6", nome: "Brother Extra Large 16x26", largura: 26, altura: 16 },
-  { id: "7", nome: "Brother Large 18x30", largura: 30, altura: 18 },
+  {
+    id: "1",
+    nome: "Brother Small 20x60",
+    largura: 6,
+    altura: 2,
+    largura_util: 5.5,
+    altura_util: 1.5,
+    margem_interna: 0.25,
+    orelha_seguranca: 2.0,
+  },
+  {
+    id: "2",
+    nome: "Brother Small 30x50",
+    largura: 5,
+    altura: 3,
+    largura_util: 4.5,
+    altura_util: 2.5,
+    margem_interna: 0.25,
+    orelha_seguranca: 2.0,
+  },
+  {
+    id: "3",
+    nome: "Brother Small 40x30",
+    largura: 4,
+    altura: 3,
+    largura_util: 3.5,
+    altura_util: 2.5,
+    margem_interna: 0.25,
+    orelha_seguranca: 2.0,
+  },
+  {
+    id: "4",
+    nome: "Brother Regular 10x10",
+    largura: 10,
+    altura: 10,
+    largura_util: 9.5,
+    altura_util: 9.5,
+    margem_interna: 0.25,
+    orelha_seguranca: 2.0,
+  },
+  {
+    id: "5",
+    nome: "Brother Medium 13x18",
+    largura: 18,
+    altura: 13,
+    largura_util: 17.5,
+    altura_util: 12.5,
+    margem_interna: 0.25,
+    orelha_seguranca: 2.0,
+  },
+  {
+    id: "6",
+    nome: "Brother Extra Large 16x26",
+    largura: 26,
+    altura: 16,
+    largura_util: 25.5,
+    altura_util: 15.5,
+    margem_interna: 0.25,
+    orelha_seguranca: 2.0,
+  },
+  {
+    id: "7",
+    nome: "Brother Large 18x30",
+    largura: 30,
+    altura: 18,
+    largura_util: 29.5,
+    altura_util: 17.5,
+    margem_interna: 0.25,
+    orelha_seguranca: 2.0,
+  },
 ];
 
 // Descontos padrão por quantidade

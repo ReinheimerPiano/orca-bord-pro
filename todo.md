@@ -42,3 +42,42 @@
 - [x] Adicionar botão para duplicar orçamento existente
 - [x] Exibir sugestões de orçamentos similares durante a criação
 - [x] Adicionar informações do usuário no orçamento (quem criou, quando)
+
+## Sistema Avançado de Bastidores e Otimização
+
+- [x] Atualizar modelo de bastidores com área útil real (descontando margem interna não bordável)
+- [x] Adicionar campo de margem interna não bordável nos bastidores
+- [x] Adicionar campo de orelha de segurança (padrão 2cm) para esticar tecido
+- [x] Implementar cálculo de quantos bordados cabem com segurança no bastidor
+- [x] Adicionar sugestão de rotação de matriz (90°) para otimizar espaço
+- [x] Criar configuração de margem entre bordados dentro do bastidor
+- [x] Sugerir melhor bastidor baseado em menor perda de material
+- [x] Sugerir melhor bastidor baseado em quantidade de peças que cabem
+
+## Dois Modos de Trabalho
+
+- [ ] Criar seletor de modo: "Patches" vs "Peça de Cliente"
+- [ ] Modo Patches: manter lógica atual
+- [ ] Modo Peça de Cliente: adicionar campo de margem de perda de material/peça
+- [ ] Ajustar cálculos de custo baseado no modo selecionado
+
+## Sistema de Custo de Matriz
+
+- [x] Adicionar campo "Custo de Criação de Matriz" nas configurações
+- [x] Adicionar campo "Valor Mínimo para Isenção de Matriz" nas configurações
+- [x] Implementar lógica de isenção automática quando pedido ultrapassa valor mínimo
+- [x] Exibir custo de matriz no resultado do cálculo
+- [x] Mostrar mensagem quando matriz for isenta
+
+## Limite de Custo por Milhar
+
+- [x] Adicionar campo "Limite Máximo de Custo por Milhar" nas configurações
+- [x] Aplicar teto configurável no cálculo de custo técnico por pontos
+- [x] Exibir aviso quando o limite for atingido (armazenado no resultado)
+
+## Melhorias de Interface
+
+- [ ] Melhorar responsividade mobile (formulários, tabelas, navegação)
+- [ ] Renomear aplicação para "BordaCalc Pro" ou "Trilinha Manager"
+- [ ] Otimizar layout para telas pequenas
+- [ ] Melhorar usabilidade em dispositivos touch
