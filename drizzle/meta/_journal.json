@@ -15,6 +15,13 @@
       "when": 1762979310626,
       "tag": "0001_classy_deathbird",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1763047682372,
+      "tag": "0002_workable_wraith",
+      "breakpoints": true
     }
   ]
 }

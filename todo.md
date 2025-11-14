@@ -89,3 +89,41 @@
 - [x] Adicionar transições suaves e animações
 - [x] Aumentar área de toque dos botões para mobile
 - [x] Testar em diferentes tamanhos de tela
+
+## Persistência Completa de Dados em Banco
+
+- [x] Criar tabela de configurações no banco
+- [x] Criar tabela de máquinas no banco
+- [x] Criar tabela de tecidos no banco
+- [x] Migrar bastidores do localStorage para o banco (schema criado)
+- [x] Migrar descontos do localStorage para o banco (schema criado)
+- [x] Criar APIs tRPC para gerenciar configurações
+- [x] Criar APIs tRPC para gerenciar máquinas
+- [x] Criar APIs tRPC para gerenciar tecidos
+- [ ] Atualizar interfaces para usar dados do banco
+
+## Cadastro de Máquinas e Tecidos
+
+- [ ] Criar página de gerenciamento de máquinas (frontend)
+- [ ] Criar formulário de cadastro/edição de máquinas
+- [ ] Criar página de gerenciamento de tecidos (frontend)
+- [ ] Criar formulário de cadastro/edição de tecidos
+- [ ] Adicionar validações nos formulários
+
+## Workflow de Orçamento com Etapas
+
+- [x] Adicionar campo "status" na tabela de orçamentos (orçamento, matriz_arte, finalizado)
+- [x] Criar tabela para dados de matriz e arte (pontos finais, cores, arquivos)
+- [x] Criar tabela para dados de finalização (fotos, numeração de linhas)
+- [ ] Implementar upload de arquivos (Wilcom .dst, vetores .ai/.svg)
+- [ ] Implementar upload de fotos do resultado final
+- [ ] Criar página de edição de orçamento com etapas
+- [ ] Adicionar botões de ação na listagem de orçamentos (Editar, Adicionar Matriz, Finalizar)
+
+## Dois Modos de Trabalho
+
+- [ ] Adicionar campo "modo_trabalho" no formulário (patches, peca_cliente)
+- [ ] Adicionar campo "margem_perda_material" para modo peça de cliente
+- [ ] Ajustar cálculo de custo baseado no modo selecionado
+- [ ] Salvar modo de trabalho no orçamento
+- [ ] Exibir modo de trabalho no resultado e na listagem

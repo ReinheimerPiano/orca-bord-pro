@@ -1,7 +1,8 @@
 import { eq, desc, and, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, orcamentos, type Orcamento, type InsertOrcamento } from "../drizzle/schema";
+import { InsertUser, users, orcamentos, type Orcamento, type InsertOrcamento, configuracoes, type Configuracao, type InsertConfiguracao, maquinas, type Maquina, type InsertMaquina, materiaisBase, type MaterialBase, type InsertMaterialBase, bastidores, type Bastidor, type InsertBastidor, descontosQuantidade, type DescontoQuantidade, type InsertDescontoQuantidade } from "../drizzle/schema";
 import { ENV } from './_core/env';
+
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -199,5 +200,280 @@ export async function deleteOrcamento(id: number, userId: number): Promise<boole
     .delete(orcamentos)
     .where(and(eq(orcamentos.id, id), eq(orcamentos.userId, userId)));
 
+  return true;
+}
+
+
+// ===== Funções para Configurações =====
+
+/**
+ * Busca as configurações globais (sempre retorna a primeira linha)
+ */
+export async function getConfiguracoes(): Promise<Configuracao | undefined> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db.select().from(configuracoes).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Atualiza as configurações globais
+ */
+export async function updateConfiguracoes(data: Partial<InsertConfiguracao>): Promise<Configuracao> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const config = await getConfiguracoes();
+  
+  if (!config) {
+    // Se não existir, criar
+    const result = await db.insert(configuracoes).values(data);
+    const insertedId = Number(result[0].insertId);
+    const inserted = await db.select().from(configuracoes).where(eq(configuracoes.id, insertedId)).limit(1);
+    if (inserted.length === 0) throw new Error("Failed to create configuracoes");
+    return inserted[0];
+  }
+
+  // Atualizar
+  await db.update(configuracoes).set(data).where(eq(configuracoes.id, config.id));
+  const updated = await db.select().from(configuracoes).where(eq(configuracoes.id, config.id)).limit(1);
+  if (updated.length === 0) throw new Error("Failed to update configuracoes");
+  return updated[0];
+}
+
+// ===== Funções para Máquinas =====
+
+/**
+ * Lista todas as máquinas ativas
+ */
+export async function getMaquinas(): Promise<Maquina[]> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  return await db.select().from(maquinas).where(eq(maquinas.ativo, 1));
+}
+
+/**
+ * Cria uma nova máquina
+ */
+export async function createMaquina(data: InsertMaquina): Promise<Maquina> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db.insert(maquinas).values(data);
+  const insertedId = Number(result[0].insertId);
+  const inserted = await db.select().from(maquinas).where(eq(maquinas.id, insertedId)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create maquina");
+  return inserted[0];
+}
+
+/**
+ * Atualiza uma máquina
+ */
+export async function updateMaquina(id: number, data: Partial<InsertMaquina>): Promise<Maquina> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.update(maquinas).set(data).where(eq(maquinas.id, id));
+  const updated = await db.select().from(maquinas).where(eq(maquinas.id, id)).limit(1);
+  if (updated.length === 0) throw new Error("Failed to update maquina");
+  return updated[0];
+}
+
+/**
+ * Deleta uma máquina (soft delete)
+ */
+export async function deleteMaquina(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.update(maquinas).set({ ativo: 0 }).where(eq(maquinas.id, id));
+  return true;
+}
+
+// ===== Funções para Materiais Base =====
+
+/**
+ * Lista todos os materiais ativos
+ */
+export async function getMateriaisBase(): Promise<MaterialBase[]> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  return await db.select().from(materiaisBase).where(eq(materiaisBase.ativo, 1));
+}
+
+/**
+ * Cria um novo material
+ */
+export async function createMaterialBase(data: InsertMaterialBase): Promise<MaterialBase> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db.insert(materiaisBase).values(data);
+  const insertedId = Number(result[0].insertId);
+  const inserted = await db.select().from(materiaisBase).where(eq(materiaisBase.id, insertedId)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create material");
+  return inserted[0];
+}
+
+/**
+ * Atualiza um material
+ */
+export async function updateMaterialBase(id: number, data: Partial<InsertMaterialBase>): Promise<MaterialBase> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.update(materiaisBase).set(data).where(eq(materiaisBase.id, id));
+  const updated = await db.select().from(materiaisBase).where(eq(materiaisBase.id, id)).limit(1);
+  if (updated.length === 0) throw new Error("Failed to update material");
+  return updated[0];
+}
+
+/**
+ * Deleta um material (soft delete)
+ */
+export async function deleteMaterialBase(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.update(materiaisBase).set({ ativo: 0 }).where(eq(materiaisBase.id, id));
+  return true;
+}
+
+// ===== Funções para Bastidores =====
+
+/**
+ * Lista todos os bastidores ativos
+ */
+export async function getBastidores(): Promise<Bastidor[]> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  return await db.select().from(bastidores).where(eq(bastidores.ativo, 1));
+}
+
+/**
+ * Cria um novo bastidor
+ */
+export async function createBastidor(data: InsertBastidor): Promise<Bastidor> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db.insert(bastidores).values(data);
+  const insertedId = Number(result[0].insertId);
+  const inserted = await db.select().from(bastidores).where(eq(bastidores.id, insertedId)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create bastidor");
+  return inserted[0];
+}
+
+/**
+ * Atualiza um bastidor
+ */
+export async function updateBastidor(id: number, data: Partial<InsertBastidor>): Promise<Bastidor> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.update(bastidores).set(data).where(eq(bastidores.id, id));
+  const updated = await db.select().from(bastidores).where(eq(bastidores.id, id)).limit(1);
+  if (updated.length === 0) throw new Error("Failed to update bastidor");
+  return updated[0];
+}
+
+/**
+ * Deleta um bastidor (soft delete)
+ */
+export async function deleteBastidor(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.update(bastidores).set({ ativo: 0 }).where(eq(bastidores.id, id));
+  return true;
+}
+
+// ===== Funções para Descontos por Quantidade =====
+
+/**
+ * Lista todos os descontos ativos
+ */
+export async function getDescontosQuantidade(): Promise<DescontoQuantidade[]> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  return await db.select().from(descontosQuantidade).where(eq(descontosQuantidade.ativo, 1)).orderBy(descontosQuantidade.quantidade_minima);
+}
+
+/**
+ * Cria um novo desconto
+ */
+export async function createDescontoQuantidade(data: InsertDescontoQuantidade): Promise<DescontoQuantidade> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db.insert(descontosQuantidade).values(data);
+  const insertedId = Number(result[0].insertId);
+  const inserted = await db.select().from(descontosQuantidade).where(eq(descontosQuantidade.id, insertedId)).limit(1);
+  if (inserted.length === 0) throw new Error("Failed to create desconto");
+  return inserted[0];
+}
+
+/**
+ * Atualiza um desconto
+ */
+export async function updateDescontoQuantidade(id: number, data: Partial<InsertDescontoQuantidade>): Promise<DescontoQuantidade> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.update(descontosQuantidade).set(data).where(eq(descontosQuantidade.id, id));
+  const updated = await db.select().from(descontosQuantidade).where(eq(descontosQuantidade.id, id)).limit(1);
+  if (updated.length === 0) throw new Error("Failed to update desconto");
+  return updated[0];
+}
+
+/**
+ * Deleta um desconto (soft delete)
+ */
+export async function deleteDescontoQuantidade(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.update(descontosQuantidade).set({ ativo: 0 }).where(eq(descontosQuantidade.id, id));
   return true;
 }
