@@ -59,6 +59,8 @@ export default function Home() {
   const [margemPercentual, setMargemPercentual] = useState<string>((configuracoes.margem_padrao * 100).toString());
   const [quantidade, setQuantidade] = useState<string>("1");
   const [vendaOnline, setVendaOnline] = useState<boolean>(false);
+  const [modoTrabalho, setModoTrabalho] = useState<"patches" | "peca_cliente">("patches");
+  const [margemPerdaMaterial, setMargemPerdaMaterial] = useState<string>("5");
 
   // Estado do resultado
   const [resultado, setResultado] = useState<ResultadoCalculo | null>(null);
@@ -166,6 +168,10 @@ export default function Home() {
 
     const area_carregada_m2 = area_carregada_cm2 / 10000;
 
+    // Aplicar margem de perda de material se modo for "peca_cliente"
+    const _margemPerdaMaterial = modoTrabalho === "peca_cliente" ? parseFloat(margemPerdaMaterial) / 100 : 0;
+    const area_carregada_com_perda_m2 = area_carregada_m2 * (1 + _margemPerdaMaterial);
+
     // --- 2. Custo de Materiais ---
     let custo_tecido_m2: number;
     if (materialBase === "Nylon 600") {
@@ -184,7 +190,7 @@ export default function Home() {
       custo_material_base_m2 += custo_termocolante_m2;
     }
 
-    const custo_materiais = custo_material_base_m2 * area_carregada_m2 * (1 + configuracoes.desperdicio);
+    const custo_materiais = custo_material_base_m2 * area_carregada_com_perda_m2 * (1 + configuracoes.desperdicio);
 
     // --- 3. Custo de Linha ---
     const consumo_linha = _pontos * (configuracoes.consumo_por_1000_pontos / 1000);
@@ -313,6 +319,8 @@ export default function Home() {
       custo_matriz,
       matriz_isenta,
       limite_custo_atingido: limite_atingido,
+      modo_trabalho: modoTrabalho,
+      margem_perda_material: _margemPerdaMaterial * 100,
     };
 
     setResultado(resultadoCalculado);
@@ -513,6 +521,29 @@ export default function Home() {
                   <Input id="quantidade" type="number" value={quantidade} onChange={(e) => setQuantidade(e.target.value)} />
                 </div>
               </div>
+
+              {/* Modo de Trabalho */}
+              <div className="space-y-2">
+                <Label htmlFor="modoTrabalho">Modo de Trabalho</Label>
+                <Select value={modoTrabalho} onValueChange={(value) => setModoTrabalho(value as "patches" | "peca_cliente")}>
+                  <SelectTrigger id="modoTrabalho">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="patches">Patches (Avulsos)</SelectItem>
+                    <SelectItem value="peca_cliente">Peça de Cliente</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Margem de Perda de Material (apenas para Peça de Cliente) */}
+              {modoTrabalho === "peca_cliente" && (
+                <div className="space-y-2">
+                  <Label htmlFor="margemPerdaMaterial">Margem de Perda de Material (%)</Label>
+                  <Input id="margemPerdaMaterial" type="number" value={margemPerdaMaterial} onChange={(e) => setMargemPerdaMaterial(e.target.value)} />
+                  <p className="text-xs text-gray-500">Margem adicional para perdas no corte e ajuste da peça</p>
+                </div>
+              )}
 
               {/* Venda Online */}
               <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">

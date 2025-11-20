@@ -10,6 +10,8 @@ import Configuracoes from "./pages/Configuracoes";
 import Bastidores from "./pages/Bastidores";
 import Descontos from "./pages/Descontos";
 import Orcamentos from "./pages/Orcamentos";
+import Maquinas from "./pages/Maquinas";
+import Materiais from "./pages/Materiais";
 import { Calculator, Settings, Box, Percent, FileText, LogIn, LogOut, User, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./components/ui/button";
@@ -25,6 +27,8 @@ function Navigation() {
     { path: "/", label: "Calculadora", icon: Calculator },
     { path: "/bastidores", label: "Bastidores", icon: Box },
     { path: "/descontos", label: "Descontos", icon: Percent },
+    { path: "/maquinas", label: "Máquinas", icon: Settings },
+    { path: "/materiais", label: "Materiais", icon: Settings },
     { path: "/configuracoes", label: "Configurações", icon: Settings },
   ];
 
@@ -177,6 +181,8 @@ function Router() {
         <Route path={"/"} component={Home} />
         <Route path={"/bastidores"} component={Bastidores} />
         <Route path={"/descontos"} component={Descontos} />
+        <Route path={"/maquinas"} component={Maquinas} />
+        <Route path={"/materiais"} component={Materiais} />
         <Route path={"/configuracoes"} component={Configuracoes} />
         <Route path={"/orcamentos"} component={Orcamentos} />
         <Route path={"/404"} component={NotFound} />

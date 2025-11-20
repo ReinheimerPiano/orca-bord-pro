@@ -56,10 +56,10 @@
 
 ## Dois Modos de Trabalho
 
-- [ ] Criar seletor de modo: "Patches" vs "Peça de Cliente"
-- [ ] Modo Patches: manter lógica atual
-- [ ] Modo Peça de Cliente: adicionar campo de margem de perda de material/peça
-- [ ] Ajustar cálculos de custo baseado no modo selecionado
+- [x] Criar seletor de modo: "Patches" vs "Peça de Cliente"
+- [x] Modo Patches: manter lógica atual
+- [x] Modo Peça de Cliente: adicionar campo de margem de perda de material/peça
+- [x] Ajustar cálculos de custo baseado no modo selecionado
 
 ## Sistema de Custo de Matriz
 
@@ -100,15 +100,12 @@
 - [x] Criar APIs tRPC para gerenciar configurações
 - [x] Criar APIs tRPC para gerenciar máquinas
 - [x] Criar APIs tRPC para gerenciar tecidos
-- [ ] Atualizar interfaces para usar dados do banco
+- [x] Atualizar interfaces para usar dados do banco
 
-## Cadastro de Máquinas e Tecidos
-
-- [ ] Criar página de gerenciamento de máquinas (frontend)
-- [ ] Criar formulário de cadastro/edição de máquinas
-- [ ] Criar página de gerenciamento de tecidos (frontend)
-- [ ] Criar formulário de cadastro/edição de tecidos
-- [ ] Adicionar validações nos formulários
+## Cadastro de Máquinas e Tecidos- [x] Criar página de gerenciamento de máquinas (frontend)
+- [x] Criar formulário de cadastro/edição de máquina- [x] Criar página de gerenciamento de tecidos (frontend)
+- [x] Criar formulário de cadastro/edição de tecidos
+- [x] Adicionar validações nos formulários
 
 ## Workflow de Orçamento com Etapas
 
@@ -122,8 +119,7 @@
 
 ## Dois Modos de Trabalho
 
-- [ ] Adicionar campo "modo_trabalho" no formulário (patches, peca_cliente)
-- [ ] Adicionar campo "margem_perda_material" para modo peça de cliente
-- [ ] Ajustar cálculo de custo baseado no modo selecionado
-- [ ] Salvar modo de trabalho no orçamento
-- [ ] Exibir modo de trabalho no resultado e na listagem
+- [x] Adicionar campo "modo_trabalho" no formulário (patches, peca_cliente- [x] Adicionar campo "margem_perda_material" para modo peça de cliente
+- [x] Ajustar cálculo de custo baseado no modo selecionado
+- [x] Salvar modo de trabalho no orçamento
+- [x] Exibir modo de trabalho no resultado e na listagem
