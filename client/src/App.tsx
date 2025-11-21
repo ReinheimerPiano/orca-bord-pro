@@ -12,7 +12,8 @@ import Descontos from "./pages/Descontos";
 import Orcamentos from "./pages/Orcamentos";
 import Maquinas from "./pages/Maquinas";
 import Materiais from "./pages/Materiais";
-import { Calculator, Settings, Box, Percent, FileText, LogIn, LogOut, User, Menu, X } from "lucide-react";
+import Carrinho from "./pages/Carrinho";
+import { Calculator, Settings, Box, Percent, FileText, LogIn, LogOut, User, Menu, X, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./components/ui/button";
 import { useAuth } from "./_core/hooks/useAuth";
@@ -25,6 +26,7 @@ function Navigation() {
 
   const links = [
     { path: "/", label: "Calculadora", icon: Calculator },
+    { path: "/carrinho", label: "Carrinho", icon: ShoppingCart },
     { path: "/bastidores", label: "Bastidores", icon: Box },
     { path: "/descontos", label: "Descontos", icon: Percent },
     { path: "/maquinas", label: "Máquinas", icon: Settings },
@@ -179,6 +181,7 @@ function Router() {
       <Navigation />
       <Switch>
         <Route path={"/"} component={Home} />
+        <Route path={"/carrinho"} component={Carrinho} />
         <Route path={"/bastidores"} component={Bastidores} />
         <Route path={"/descontos"} component={Descontos} />
         <Route path={"/maquinas"} component={Maquinas} />

@@ -123,3 +123,18 @@
 - [x] Ajustar cálculo de custo baseado no modo selecionado
 - [x] Salvar modo de trabalho no orçamento
 - [x] Exibir modo de trabalho no resultado e na listagem
+
+
+## FASE 1: Orçamentos Multi-Itens
+
+- [x] Atualizar schema do banco para tabela de itens de orçamento
+- [x] Criar tabela de itens_orcamento com todos os dados do item
+- [x] Criar página de Carrinho de Itens
+- [x] Implementar adicionar item ao carrinho
+- [x] Implementar remover item do carrinho
+- [x] Implementar editar item do carrinho
+- [x] Implementar lógica de desconto progressivo consolidado
+- [x] Criar resumo consolidado do orçamento (custo total, preço total, margem)
+- [ ] Atualizar APIs tRPC para salvar múltiplos itens
+- [ ] Melhorar listagem de orçamentos para exibir itens
+- [ ] Testar fluxo completo de múltiplos itens

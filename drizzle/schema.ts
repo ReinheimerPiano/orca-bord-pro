@@ -231,6 +231,47 @@ export type TipoFixacao = typeof tiposFixacao.$inferSelect;
 export type InsertTipoFixacao = typeof tiposFixacao.$inferInsert;
 
 /**
+ * Tabela de Itens de Orçamento (para suportar múltiplos itens por orçamento)
+ */
+export const itensOrcamento = mysqlTable("itens_orcamento", {
+  id: int("id").autoincrement().primaryKey(),
+  orcamento_id: int("orcamento_id").notNull(),
+  
+  // Dados do item
+  forma: varchar("forma", { length: 20 }).notNull(),
+  tamanhoA: int("tamanhoA").notNull(),
+  tamanhoB: int("tamanhoB"),
+  pontos: int("pontos").notNull(),
+  cores: int("cores").notNull(),
+  fixacao: varchar("fixacao", { length: 20 }).notNull(),
+  maquina: varchar("maquina", { length: 20 }).notNull(),
+  materialBase: varchar("materialBase", { length: 50 }).notNull(),
+  quantidade: int("quantidade").notNull(),
+  modoTrabalho: varchar("modoTrabalho", { length: 20 }).notNull().default("patches"),
+  margemPerdaMaterial: int("margemPerdaMaterial").notNull().default(0),
+  
+  // Resultados do cálculo (em centavos)
+  custoMateriais: int("custoMateriais").notNull(),
+  custoLinha: int("custoLinha").notNull(),
+  custoEnergia: int("custoEnergia").notNull(),
+  custoPorPontos: int("custoPorPontos").notNull(),
+  custoFixacaoAdicional: int("custoFixacaoAdicional").notNull(),
+  custoTotalProducao: int("custoTotalProducao").notNull(),
+  precoUnitario: int("precoUnitario").notNull(),
+  precoTotal: int("precoTotal").notNull(),
+  
+  // Informações adicionais
+  bastidorSugerido: varchar("bastidorSugerido", { length: 50 }),
+  pecasPorBastidor: int("pecasPorBastidor"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ItemOrcamento = typeof itensOrcamento.$inferSelect;
+export type InsertItemOrcamento = typeof itensOrcamento.$inferInsert;
+
+/**
  * Tabela de Histórico de Status de Orçamento
  */
 export const historicoStatusOrcamento = mysqlTable("historico_status_orcamento", {
